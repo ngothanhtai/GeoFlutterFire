@@ -108,7 +108,6 @@ class GeoFireCollectionRef {
     @required GeoFirePoint center,
     @required double radius,
     @required String geohashField,
-    @required String coordinatesField,
     bool strictMode = false,
   }) {
     final precision = Util.setPrecision(radius);
