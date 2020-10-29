@@ -1,10 +1,36 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:geoflutterfire/src/models/DistanceDocSnapshot.dart';
 import 'package:geoflutterfire/src/point.dart';
-import 'util.dart';
 import 'package:rxdart/rxdart.dart';
-import 'dart:async';
+
+import 'util.dart';
+
+class Location {
+  Coordinates coordinates;
+
+  Location({this.coordinates});
+
+  Location.fromJson(Map<String, dynamic> json) {
+    coordinates = json['coordinates'] != null
+        ? Coordinates.fromJson(json['coordinates'])
+        : null;
+  }
+}
+
+class Coordinates {
+  double latitude;
+  double longitude;
+
+  Coordinates({this.latitude, this.longitude});
+
+  Coordinates.fromJson(Map<String, dynamic> json) {
+    latitude = json['latitude'];
+    longitude = json['longitude'];
+  }
+}
 
 class GeoFireCollectionRef {
   Query _collectionReference;
@@ -81,7 +107,8 @@ class GeoFireCollectionRef {
   Stream<List<DocumentSnapshot>> within({
     @required GeoFirePoint center,
     @required double radius,
-    @required String field,
+    @required String geohashField,
+    @required String coordinatesField,
     bool strictMode = false,
   }) {
     final precision = Util.setPrecision(radius);
@@ -89,7 +116,7 @@ class GeoFireCollectionRef {
     final area = GeoFirePoint.neighborsOf(hash: centerHash)..add(centerHash);
 
     Iterable<Stream<List<DistanceDocSnapshot>>> queries = area.map((hash) {
-      final tempQuery = _queryPoint(hash, field);
+      final tempQuery = _queryPoint(hash, geohashField);
       return _createStream(tempQuery).map((QuerySnapshot querySnapshot) {
         return querySnapshot.docs
             .map((element) => DistanceDocSnapshot(element, null))
@@ -103,17 +130,18 @@ class GeoFireCollectionRef {
     var filtered = mergedObservable.map((List<DistanceDocSnapshot> list) {
       var mappedList = list.map((DistanceDocSnapshot distanceDocSnapshot) {
         // split and fetch geoPoint from the nested Map
-        final fieldList = field.split('.');
-        var geoPointField =
-            distanceDocSnapshot.documentSnapshot.data()[fieldList[0]];
-        if (fieldList.length > 1) {
-          for (int i = 1; i < fieldList.length; i++) {
-            geoPointField = geoPointField[fieldList[i]];
-          }
+        final json = distanceDocSnapshot.documentSnapshot.data();
+        final location = json['location'] != null
+            ? Location.fromJson(json['location'])
+            : null;
+
+        if (location?.coordinates != null) {
+          distanceDocSnapshot.distance = center.distance(
+            lat: location.coordinates.latitude,
+            lng: location.coordinates.longitude,
+          );
         }
-        final GeoPoint geoPoint = geoPointField['geopoint'];
-        distanceDocSnapshot.distance =
-            center.distance(lat: geoPoint.latitude, lng: geoPoint.longitude);
+
         return distanceDocSnapshot;
       });
 
@@ -155,7 +183,7 @@ class GeoFireCollectionRef {
   Query _queryPoint(String geoHash, String field) {
     final end = '$geoHash~';
     final temp = _collectionReference;
-    return temp.orderBy('$field.geohash').startAt([geoHash]).endAt([end]);
+    return temp.orderBy(field).startAt([geoHash]).endAt([end]);
   }
 
   /// create an observable for [ref], [ref] can be [Query] or [CollectionReference]
