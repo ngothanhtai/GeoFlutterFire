@@ -25,7 +25,7 @@ class _MyAppState extends State<MyApp> {
   TextEditingController _latitudeController, _longitudeController;
 
   // firestore init
-  final _firestore = Firestore.instance;
+  final _firestore = FirebaseFirestore.instance;
   Geoflutterfire geo;
   Stream<List<DocumentSnapshot>> stream;
   final radius = BehaviorSubject<double>.seeded(1.0);
@@ -247,7 +247,7 @@ class _MyAppState extends State<MyApp> {
 
   void _updateMarkers(List<DocumentSnapshot> documentList) {
     documentList.forEach((DocumentSnapshot document) {
-      final GeoPoint point = document.data['position']['geopoint'];
+      final GeoPoint point = document.data()['position']['geopoint'];
       _addMarker(point.latitude, point.longitude);
     });
   }

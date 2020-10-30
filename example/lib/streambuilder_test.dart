@@ -10,7 +10,7 @@ class StreamTestWidget extends StatefulWidget {
 
 class _StreamTestWidgetState extends State<StreamTestWidget> {
   Stream<List<DocumentSnapshot>> stream;
-  final _firestore = Firestore.instance;
+  final _firestore = FirebaseFirestore.instance;
   final geo = Geoflutterfire();
 
   // ignore: close_sinks
@@ -48,13 +48,13 @@ class _StreamTestWidgetState extends State<StreamTestWidget> {
                   child: ListView.builder(
                     itemBuilder: (context, index) {
                       final doc = snapshots.data[index];
-                      final data = doc.data;
+                      final data = doc.data();
                       print(
-                          'doc with id ${doc.documentID} distance ${data['distance']}');
+                          'doc with id ${doc.id} distance ${data['distance']}');
                       GeoPoint point = data['position']['geopoint'];
                       return ListTile(
                         title: Text(
-                          doc.documentID,
+                          doc.id,
                           style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                         subtitle: Text('${point.latitude}, ${point.longitude}'),
