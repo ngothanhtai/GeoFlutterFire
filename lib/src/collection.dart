@@ -49,10 +49,10 @@ class GeoFireCollectionRef {
   /// return the Document mapped to the [id]
   Stream<List<DocumentSnapshot>> data(String id) {
     return _stream.map((QuerySnapshot querySnapshot) {
-      querySnapshot.docs.where((DocumentSnapshot documentSnapshot) {
-        return documentSnapshot.id == id;
+      querySnapshot.documents.where((DocumentSnapshot documentSnapshot) {
+        return documentSnapshot.documentID == id;
       });
-      return querySnapshot.docs;
+      return querySnapshot.documents;
     });
   }
 
@@ -71,7 +71,7 @@ class GeoFireCollectionRef {
   Future<void> delete(id) {
     try {
       CollectionReference colRef = _collectionReference;
-      return colRef.doc(id).delete();
+      return colRef.document(id).delete();
     } catch (e) {
       throw Exception(
           'cannot call delete on Query, use collection reference instead');
@@ -82,7 +82,7 @@ class GeoFireCollectionRef {
   Future<void> setDoc(String id, var data, {bool merge = false}) {
     try {
       CollectionReference colRef = _collectionReference;
-      return colRef.doc(id).set(data, SetOptions(merge: merge));
+      return colRef.document(id).setData(data, merge: merge);
     } catch (e) {
       throw Exception(
           'cannot call set on Query, use collection reference instead');
@@ -95,7 +95,7 @@ class GeoFireCollectionRef {
     try {
       CollectionReference colRef = _collectionReference;
       var point = GeoFirePoint(latitude, longitude).data;
-      return colRef.doc(id).set({'$field': point}, SetOptions(merge: true));
+      return colRef.document(id).setData({'$field': point}, merge: true);
     } catch (e) {
       throw Exception(
           'cannot call set on Query, use collection reference instead');
@@ -117,7 +117,7 @@ class GeoFireCollectionRef {
     Iterable<Stream<List<DistanceDocSnapshot>>> queries = area.map((hash) {
       final tempQuery = _queryPoint(hash, geohashField);
       return _createStream(tempQuery).map((QuerySnapshot querySnapshot) {
-        return querySnapshot.docs
+        return querySnapshot.documents
             .map((element) => DistanceDocSnapshot(element, null))
             .toList();
       });
@@ -129,7 +129,7 @@ class GeoFireCollectionRef {
     var filtered = mergedObservable.map((List<DistanceDocSnapshot> list) {
       var mappedList = list.map((DistanceDocSnapshot distanceDocSnapshot) {
         // split and fetch geoPoint from the nested Map
-        final json = distanceDocSnapshot.documentSnapshot.data();
+        final json = distanceDocSnapshot.documentSnapshot.data;
         final location = json['location'] != null
             ? Location.fromJson(json['location'])
             : null;

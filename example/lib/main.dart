@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:geoflutterfire/geoflutterfire.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -9,7 +8,6 @@ import 'streambuilder_test.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
   runApp(MaterialApp(
     title: 'Geo Flutter Fire example',
     home: MyApp(),
@@ -27,7 +25,7 @@ class _MyAppState extends State<MyApp> {
   TextEditingController _latitudeController, _longitudeController;
 
   // firestore init
-  final _firestore = FirebaseFirestore.instance;
+  final _firestore = Firestore.instance;
   Geoflutterfire geo;
   Stream<List<DocumentSnapshot>> stream;
   final radius = BehaviorSubject<double>.seeded(1.0);
@@ -249,7 +247,7 @@ class _MyAppState extends State<MyApp> {
 
   void _updateMarkers(List<DocumentSnapshot> documentList) {
     documentList.forEach((DocumentSnapshot document) {
-      final GeoPoint point = document.data()['position']['geopoint'];
+      final GeoPoint point = document.data['position']['geopoint'];
       _addMarker(point.latitude, point.longitude);
     });
   }
