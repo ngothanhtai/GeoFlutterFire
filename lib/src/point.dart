@@ -1,7 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
+import 'package:geoflutterfire/src/collection.dart';
 
 import 'util.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class GeoFirePoint {
   static Util _util = Util();
@@ -36,12 +37,13 @@ class GeoFirePoint {
   }
 
   Coordinates get coords {
-    return Coordinates(this.latitude, this.longitude);
+    return Coordinates(latitude: this.latitude, longitude: this.longitude);
   }
 
   /// return distance between [GeoFirePoint] and ([lat], [lng])
   double distance({@required double lat, @required double lng}) {
-    return distanceBetween(from: coords, to: Coordinates(lat, lng));
+    return distanceBetween(
+        from: coords, to: Coordinates(latitude: lat, longitude: lng));
   }
 
   get data {
@@ -51,13 +53,6 @@ class GeoFirePoint {
   /// haversine distance between [GeoFirePoint] and ([lat], [lng])
   haversineDistance({@required double lat, @required double lng}) {
     return GeoFirePoint.distanceBetween(
-        from: coords, to: Coordinates(lat, lng));
+        from: coords, to: Coordinates(latitude: lat, longitude: lng));
   }
-}
-
-class Coordinates {
-  double latitude;
-  double longitude;
-
-  Coordinates(this.latitude, this.longitude);
 }

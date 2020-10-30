@@ -1,10 +1,11 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:geoflutterfire/geoflutterfire.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'streambuilder_test.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:firebase_core/firebase_core.dart';
+
+import 'streambuilder_test.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -44,7 +45,10 @@ class _MyAppState extends State<MyApp> {
       var collectionReference = _firestore.collection('locations');
 //          .where('name', isEqualTo: 'darshan');
       return geo.collection(collectionRef: collectionReference).within(
-          center: center, radius: rad, field: 'position', strictMode: true);
+          center: center,
+          radius: rad,
+          geohashField: 'geohash',
+          strictMode: true);
 
       /*
       ****Example to specify nested object****

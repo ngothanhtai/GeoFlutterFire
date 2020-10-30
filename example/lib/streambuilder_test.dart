@@ -23,7 +23,10 @@ class _StreamTestWidgetState extends State<StreamTestWidget> {
     stream = radius.switchMap((rad) {
       var collectionReference = _firestore.collection('locations');
       return geo.collection(collectionRef: collectionReference).within(
-          center: center, radius: rad, field: 'position', strictMode: true);
+          center: center,
+          radius: rad,
+          geohashField: 'geohash',
+          strictMode: true);
     });
   }
 
